@@ -56,5 +56,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "Epic Minesweeper.sln"
+    "dotnet.defaultSolution": "Epic-Minesweeper.sln"
 }

@@ -31,7 +31,7 @@ public class zombie_behavior : MonoBehaviour
 
     [SerializeField]
 
-    // testing for Git Updates
+    // testing for Git Updates part 2
     void Start()
     {
        

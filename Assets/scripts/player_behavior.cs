@@ -126,7 +126,6 @@ public class player_behavior : MonoBehaviour
         active = true;
       }
     }
-    Debug.Log(presses);
   }
 
   private void tryDig()

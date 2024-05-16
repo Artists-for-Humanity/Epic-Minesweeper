@@ -40,7 +40,7 @@ public class player_behavior : MonoBehaviour
   private int presses = 0;
 
   private bool lose = false;
-  private bool activeFlag = false;
+  private bool active = false;
 
   private void Awake()
   {
@@ -109,7 +109,7 @@ public class player_behavior : MonoBehaviour
     if (presses == 1)
     {
       currDirection = direction;
-      activeFlag = true;
+      active = true;
     }
     if (presses == 2)
     {
@@ -117,13 +117,13 @@ public class player_behavior : MonoBehaviour
       {
         Move(direction);
         presses = 0;
-        activeFlag = false;
+        active = false;
       }
       else
       {
         currDirection = direction;
         presses = 1;
-        activeFlag = true;
+        active = true;
       }
     }
     Debug.Log(presses);
@@ -131,31 +131,27 @@ public class player_behavior : MonoBehaviour
 
   private void tryDig()
   {
-    if (activeFlag)
+    if (active)
     {
-      // var newPlace = new Vector3Int((int)transform.position.x/2 + currDirection.x, (int)transform.position.y + currDirection.y , 0);
-      if (codeMap.GetTile(codeMap.WorldToCell(transform.position + (Vector3)currDirection)).Equals(mineTile))
-      {
         grassMap.SetTile(codeMap.WorldToCell(transform.position + (Vector3)currDirection), null);
-      }
-      else
-      {
-        grassMap.SetTile(codeMap.WorldToCell(transform.position + (Vector3)currDirection), null);
-      }
+      presses = 0;
+      active = false;
     }
   }
   private void flag()
   {
-    if (activeFlag)
+    if (active)
     {
-      if (!flagMap.HasTile(codeMap.WorldToCell(transform.position)))
+      if (!flagMap.HasTile(codeMap.WorldToCell(transform.position + (Vector3)currDirection)))
       {
         flagMap.SetTile(flagMap.WorldToCell(transform.position + (Vector3)currDirection), flagTile);
       }
       else
       {
-        flagMap.SetTile(flagMap.WorldToCell(transform.position + (Vector3)currDirection), null);
+        flagMap.SetTile(codeMap.WorldToCell(transform.position + (Vector3)currDirection), null);
       }
+      presses = 0;
+      active = false;
     }
 
   }
@@ -213,6 +209,10 @@ public class player_behavior : MonoBehaviour
     // }
     // Debug.Log(currKey);
     if (zombieMap.HasTile(codeMap.WorldToCell(transform.position)))
+    {
+      lose = true;
+    }
+    if (codeMap.GetTile(codeMap.WorldToCell(transform.position)).Equals(mineTile))
     {
       lose = true;
     }

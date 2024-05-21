@@ -61,8 +61,8 @@ public class player_behavior : MonoBehaviour
   }
   void SpawnZombies()
   {
-    grassMap.CompressBounds();
-    var size = grassMap.size;
+    codeMap.CompressBounds();
+    var size = codeMap.size;
     for (var i = 0; i < numZombies; i++)
     {
       var random = new Vector3Int(Random.Range(1, size.x) - 7, Random.Range(1, size.y) - 6, 0);

@@ -40,13 +40,16 @@ public class player_behavior : MonoBehaviour
   [SerializeField]
   private TileBase arrowRight;
   [SerializeField]
+  // current player position
   private Vector2Int position;
   [SerializeField]
-  private int numZombies;
-  [SerializeField]
+  // set amount of zombies on board from unity
+    private int numZombies;
+  // all zombie locations
   private Vector3Int[] zombies;
-
+// first arrow press, next press will do action in this direction 
   private Vector2 currDirection;
+  // 1 press = active, 2 is action, 0 is inactive
   private int presses = 0;
   private bool lose = false;
   private bool active = false;
@@ -61,17 +64,17 @@ public class player_behavior : MonoBehaviour
   {
     SpawnZombies();
   }
+  // randomly spawns zombies in valid locations throughout the board on game start
   void SpawnZombies()
   {
     zombies = new Vector3Int[numZombies];
-
 
     codeMap.CompressBounds();
     var size = codeMap.size;
     for (var i = 0; i < numZombies; i++)
     {
       var random = new Vector3Int(Random.Range(1, size.x) - 7, Random.Range(1, size.y) - 6, 0);
-      while (Math.Abs(position.x - random.x) < 4 && Math.Abs(position.y - random.y) < 4)
+      while (Math.Abs(position.x - random.x) < 6 && Math.Abs(position.y - random.y) < 6)
       {
         random = new Vector3Int(Random.Range(1, size.x) - 7, Random.Range(1, size.y) - 6, 0);
       }
@@ -80,6 +83,7 @@ public class player_behavior : MonoBehaviour
     }
 
   }
+  // checks validity of next move on second key press, move helper function
   private bool CanMove(Vector2 direction)
   {
     var position = grassMap.WorldToCell(transform.position + (Vector3)direction);
@@ -100,7 +104,7 @@ public class player_behavior : MonoBehaviour
     // moveZombies();
   }
 
-
+  // called on second arrow press, checks if arrow key was 2nd press, then moves if next move is valid
   private void tryMove(Vector2Int direction)
   {
     presses += 1;
@@ -131,7 +135,7 @@ public class player_behavior : MonoBehaviour
 
     }
   }
-
+  // called on first arrow key press, shows arrow in direction the user pressed
   void SetArrow()
   {
     arrowMap.ClearAllTiles();
@@ -162,6 +166,7 @@ public class player_behavior : MonoBehaviour
   }
 
 
+  // called when user clicks V key, checks if this click is the "action click"
   private void tryDig()
   {
     if (active)
@@ -171,6 +176,7 @@ public class player_behavior : MonoBehaviour
       active = false;
     }
   }
+  // called when F key is pressed after arrow, then places flag in valid area, arrow isn't visible in non valid directions
   private void flag()
   {
     if (active)
@@ -197,71 +203,52 @@ public class player_behavior : MonoBehaviour
   }
   private void setZombies()
   {
+    // refresh map
     zombieMap.ClearAllTiles();
+    // iterate through all current zombie locations
     for (int i = 0; i < zombies.Length; i++)
     {
-      var xDist = (int)((transform.position.x - zombies[i].x));
-      var yDist = (int)((transform.position.y - zombies[i].y));
+      // grabs horizontal and vertical distance
+      var xDist = (int)(transform.position.x - zombies[i].x);
+      var yDist = (int)(transform.position.y - zombies[i].y);
+
+      // checks if zombie[i] is on left or right side of player
       if (xDist > 0)
       {
-        zombies[i].x += 1;
+        // checks if next move is valid (applies to the rest of if statements below), it moves on that axis, else it will remains still on that axis
+        var temp = new Vector3Int(zombies[i].x + 1, zombies[i].y, 0);
+        if (codeMap.HasTile(codeMap.WorldToCell(temp)) && !zombieMap.HasTile(codeMap.WorldToCell(temp)))
+        {
+          zombies[i].x += 1;
+        }
       }
       else if (xDist < 0)
       {
-        zombies[i].x -= 1;
+        var temp = new Vector3Int(zombies[i].x - 1, zombies[i].y, 0);
+        if (codeMap.HasTile(codeMap.WorldToCell(temp)) && !zombieMap.HasTile(codeMap.WorldToCell(temp)))
+        {
+          zombies[i].x -= 1;
+        }
       }
+      // checks if zombie[i] is above or below player
       if (yDist > 0)
       {
-        zombies[i].y += 1;
+        var temp = new Vector3Int(zombies[i].x, zombies[i].y + 1, 0);
+        if (codeMap.HasTile(codeMap.WorldToCell(temp)) && !zombieMap.HasTile(codeMap.WorldToCell(temp)))
+        {
+          zombies[i].y += 1;
+        }
       }
       else if (yDist < 0)
       {
-        zombies[i].y -= 1;
-      }
-      while (zombieMap.HasTile(codeMap.WorldToCell(zombies[i])) )
-      {
-        if (Random.Range(1, 10) % 2 == 0)
+        var temp = new Vector3Int(zombies[i].x, zombies[i].y - 1, 0);
+        if (codeMap.HasTile(codeMap.WorldToCell(temp)) && !zombieMap.HasTile(codeMap.WorldToCell(temp)))
         {
-          if (Random.Range(1, 10) > 5)
-          {
-            var temp = new Vector3Int(zombies[i].x + 1,zombies[i].y,0);
-            if(codeMap.HasTile(codeMap.WorldToCell(temp)))
-            {
-              zombies[i].x += 1;
-            }
-            
-          }
-          else
-          {
-            var temp = new Vector3Int(zombies[i].x - 1,zombies[i].y,0);
-            if(codeMap.HasTile(codeMap.WorldToCell(temp)))
-            {
-              zombies[i].x -= 1;
-            }
-          }
-
-        }
-        else
-        {
-          if (Random.Range(1, 10) > 5)
-          {
-            var temp = new Vector3Int(zombies[i].x,zombies[i].y + 1,0);
-            if(codeMap.HasTile(codeMap.WorldToCell(temp)))
-            {
-              zombies[i].y += 1;
-            }
-          }
-          else
-          {
-            var temp = new Vector3Int(zombies[i].x,zombies[i].y-1,0);
-            if(codeMap.HasTile(codeMap.WorldToCell(temp)))
-            {
-              zombies[i].y -= 1;
-            }
-          }
+          zombies[i].y -= 1;
         }
       }
-      zombieMap.SetTile(codeMap.WorldToCell(zombies[i]),zombieTile);
+      // displays new zombie location
+      zombieMap.SetTile(codeMap.WorldToCell(zombies[i]), zombieTile);
     }
   }
 
@@ -271,11 +258,13 @@ public class player_behavior : MonoBehaviour
   // Update is called once per frame
   void Update()
   {
+
     Controls();
     LoseCheck();
     SetArrow();
 
   }
+  // checks movement/action buttons
   void Controls()
   {
     if (Input.GetButtonUp("Horizontal"))
@@ -312,6 +301,7 @@ public class player_behavior : MonoBehaviour
     }
 
   }
+  // checks if player is touching a zombie tile or bomb tile
   void LoseCheck()
   {
     if (zombieMap.HasTile(codeMap.WorldToCell(transform.position)))

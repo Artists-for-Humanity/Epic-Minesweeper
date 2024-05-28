@@ -166,7 +166,8 @@ public class player_behavior : MonoBehaviour
   {
     if (active)
     {
-      if (!flagMap.HasTile(codeMap.WorldToCell(transform.position + (Vector3)currDirection)))
+      if(codeMap.HasTile(codeMap.WorldToCell(transform.position + (Vector3)currDirection))){
+        if (!flagMap.HasTile(codeMap.WorldToCell(transform.position + (Vector3)currDirection)))
       {
         if (!zombieMap.HasTile(codeMap.WorldToCell(transform.position + (Vector3)currDirection)))
         {
@@ -177,6 +178,8 @@ public class player_behavior : MonoBehaviour
       {
         flagMap.SetTile(codeMap.WorldToCell(transform.position + (Vector3)currDirection), null);
       }
+      }
+      
       presses = 0;
       active = false;
     }

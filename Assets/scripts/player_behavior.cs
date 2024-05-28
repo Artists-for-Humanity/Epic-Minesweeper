@@ -44,10 +44,10 @@ public class player_behavior : MonoBehaviour
   private Vector2Int position;
   [SerializeField]
   // set amount of zombies on board from unity
-    private int numZombies;
+  private int numZombies;
   // all zombie locations
   private Vector3Int[] zombies;
-// first arrow press, next press will do action in this direction 
+  // first arrow press, next press will do action in this direction 
   private Vector2 currDirection;
   // 1 press = active, 2 is action, 0 is inactive
   private int presses = 0;
@@ -211,40 +211,47 @@ public class player_behavior : MonoBehaviour
       // grabs horizontal and vertical distance
       var xDist = (int)(transform.position.x - zombies[i].x);
       var yDist = (int)(transform.position.y - zombies[i].y);
+      // randomizes whether zombie moves vertically or horizontally
+      if (Random.Range(1, 20) % 2 == 0)
+      {
+        // checks if zombie[i] is on left or right side of player
+        if (xDist > 0)
+        {
+          // checks if next move is valid (applies to the rest of if statements below), it moves on that axis, else it will remains still on that axis
+          var temp = new Vector3Int(zombies[i].x + 1, zombies[i].y, 0);
+          if (codeMap.HasTile(codeMap.WorldToCell(temp)) && !zombieMap.HasTile(codeMap.WorldToCell(temp)))
+          {
+            zombies[i].x += 1;
+          }
+        }
+        else if (xDist < 0)
+        {
+          var temp = new Vector3Int(zombies[i].x - 1, zombies[i].y, 0);
+          if (codeMap.HasTile(codeMap.WorldToCell(temp)) && !zombieMap.HasTile(codeMap.WorldToCell(temp)))
+          {
+            zombies[i].x -= 1;
+          }
+        }
 
-      // checks if zombie[i] is on left or right side of player
-      if (xDist > 0)
-      {
-        // checks if next move is valid (applies to the rest of if statements below), it moves on that axis, else it will remains still on that axis
-        var temp = new Vector3Int(zombies[i].x + 1, zombies[i].y, 0);
-        if (codeMap.HasTile(codeMap.WorldToCell(temp)) && !zombieMap.HasTile(codeMap.WorldToCell(temp)))
-        {
-          zombies[i].x += 1;
-        }
       }
-      else if (xDist < 0)
+      else
       {
-        var temp = new Vector3Int(zombies[i].x - 1, zombies[i].y, 0);
-        if (codeMap.HasTile(codeMap.WorldToCell(temp)) && !zombieMap.HasTile(codeMap.WorldToCell(temp)))
+        // checks if zombie[i] is above or below player
+        if (yDist > 0)
         {
-          zombies[i].x -= 1;
+          var temp = new Vector3Int(zombies[i].x, zombies[i].y + 1, 0);
+          if (codeMap.HasTile(codeMap.WorldToCell(temp)) && !zombieMap.HasTile(codeMap.WorldToCell(temp)))
+          {
+            zombies[i].y += 1;
+          }
         }
-      }
-      // checks if zombie[i] is above or below player
-      if (yDist > 0)
-      {
-        var temp = new Vector3Int(zombies[i].x, zombies[i].y + 1, 0);
-        if (codeMap.HasTile(codeMap.WorldToCell(temp)) && !zombieMap.HasTile(codeMap.WorldToCell(temp)))
+        else if (yDist < 0)
         {
-          zombies[i].y += 1;
-        }
-      }
-      else if (yDist < 0)
-      {
-        var temp = new Vector3Int(zombies[i].x, zombies[i].y - 1, 0);
-        if (codeMap.HasTile(codeMap.WorldToCell(temp)) && !zombieMap.HasTile(codeMap.WorldToCell(temp)))
-        {
-          zombies[i].y -= 1;
+          var temp = new Vector3Int(zombies[i].x, zombies[i].y - 1, 0);
+          if (codeMap.HasTile(codeMap.WorldToCell(temp)) && !zombieMap.HasTile(codeMap.WorldToCell(temp)))
+          {
+            zombies[i].y -= 1;
+          }
         }
       }
       // displays new zombie location

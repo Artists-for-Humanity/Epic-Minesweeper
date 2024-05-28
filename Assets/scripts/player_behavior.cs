@@ -43,8 +43,10 @@ public class player_behavior : MonoBehaviour
   private Vector2Int position;
   [SerializeField]
   private int numZombies;
+  [SerializeField]
+  private Vector3Int[] zombies;
 
-  [SerializeField]  private Vector2 currDirection;
+  private Vector2 currDirection;
   private int presses = 0;
   private bool lose = false;
   private bool active = false;
@@ -61,8 +63,11 @@ public class player_behavior : MonoBehaviour
   }
   void SpawnZombies()
   {
-    grassMap.CompressBounds();
-    var size = grassMap.size;
+    zombies = new Vector3Int[numZombies];
+
+
+    codeMap.CompressBounds();
+    var size = codeMap.size;
     for (var i = 0; i < numZombies; i++)
     {
       var random = new Vector3Int(Random.Range(1, size.x) - 7, Random.Range(1, size.y) - 6, 0);
@@ -70,8 +75,10 @@ public class player_behavior : MonoBehaviour
       {
         random = new Vector3Int(Random.Range(1, size.x) - 7, Random.Range(1, size.y) - 6, 0);
       }
+      zombies[i] = random;
       zombieMap.SetTile(random, zombieTile);
     }
+
   }
   private bool CanMove(Vector2 direction)
   {
@@ -90,6 +97,7 @@ public class player_behavior : MonoBehaviour
     {
       transform.position += (Vector3)direction;
     }
+    // moveZombies();
   }
 
 
@@ -110,6 +118,7 @@ public class player_behavior : MonoBehaviour
 
         Move(direction);
         presses = 0;
+        setZombies();
 
 
       }
@@ -166,25 +175,97 @@ public class player_behavior : MonoBehaviour
   {
     if (active)
     {
-      if(codeMap.HasTile(codeMap.WorldToCell(transform.position + (Vector3)currDirection))){
-        if (!flagMap.HasTile(codeMap.WorldToCell(transform.position + (Vector3)currDirection)))
+      if (codeMap.HasTile(codeMap.WorldToCell(transform.position + (Vector3)currDirection)))
       {
-        if (!zombieMap.HasTile(codeMap.WorldToCell(transform.position + (Vector3)currDirection)))
+        if (!flagMap.HasTile(codeMap.WorldToCell(transform.position + (Vector3)currDirection)))
         {
-          flagMap.SetTile(flagMap.WorldToCell(transform.position + (Vector3)currDirection), flagTile);
+          if (!zombieMap.HasTile(codeMap.WorldToCell(transform.position + (Vector3)currDirection)))
+          {
+            flagMap.SetTile(flagMap.WorldToCell(transform.position + (Vector3)currDirection), flagTile);
+          }
+        }
+        else
+        {
+          flagMap.SetTile(codeMap.WorldToCell(transform.position + (Vector3)currDirection), null);
         }
       }
-      else
-      {
-        flagMap.SetTile(codeMap.WorldToCell(transform.position + (Vector3)currDirection), null);
-      }
-      }
-      
+
       presses = 0;
       active = false;
     }
 
   }
+  private void setZombies()
+  {
+    zombieMap.ClearAllTiles();
+    for (int i = 0; i < zombies.Length; i++)
+    {
+      var xDist = (int)((transform.position.x - zombies[i].x));
+      var yDist = (int)((transform.position.y - zombies[i].y));
+      if (xDist > 0)
+      {
+        zombies[i].x += 1;
+      }
+      else if (xDist < 0)
+      {
+        zombies[i].x -= 1;
+      }
+      if (yDist > 0)
+      {
+        zombies[i].y += 1;
+      }
+      else if (yDist < 0)
+      {
+        zombies[i].y -= 1;
+      }
+      while (zombieMap.HasTile(codeMap.WorldToCell(zombies[i])) )
+      {
+        if (Random.Range(1, 10) % 2 == 0)
+        {
+          if (Random.Range(1, 10) > 5)
+          {
+            var temp = new Vector3Int(zombies[i].x + 1,zombies[i].y,0);
+            if(codeMap.HasTile(codeMap.WorldToCell(temp)))
+            {
+              zombies[i].x += 1;
+            }
+            
+          }
+          else
+          {
+            var temp = new Vector3Int(zombies[i].x - 1,zombies[i].y,0);
+            if(codeMap.HasTile(codeMap.WorldToCell(temp)))
+            {
+              zombies[i].x -= 1;
+            }
+          }
+
+        }
+        else
+        {
+          if (Random.Range(1, 10) > 5)
+          {
+            var temp = new Vector3Int(zombies[i].x,zombies[i].y + 1,0);
+            if(codeMap.HasTile(codeMap.WorldToCell(temp)))
+            {
+              zombies[i].y += 1;
+            }
+          }
+          else
+          {
+            var temp = new Vector3Int(zombies[i].x,zombies[i].y-1,0);
+            if(codeMap.HasTile(codeMap.WorldToCell(temp)))
+            {
+              zombies[i].y -= 1;
+            }
+          }
+        }
+      }
+      zombieMap.SetTile(codeMap.WorldToCell(zombies[i]),zombieTile);
+    }
+  }
+
+
 
 
   // Update is called once per frame
@@ -207,6 +288,7 @@ public class player_behavior : MonoBehaviour
       {
         tryMove(new Vector2Int(-1, 0));
       }
+
     }
     else if (Input.GetButtonUp("Vertical"))
     {
@@ -218,6 +300,7 @@ public class player_behavior : MonoBehaviour
       {
         tryMove(new Vector2Int(0, 1));
       }
+
     }
     else if (Input.GetButtonUp("V"))
     {
@@ -227,12 +310,14 @@ public class player_behavior : MonoBehaviour
     {
       flag();
     }
+
   }
   void LoseCheck()
   {
     if (zombieMap.HasTile(codeMap.WorldToCell(transform.position)))
     {
       lose = true;
+      Debug.Log("LOSERFIKHBFS");
     }
     if (codeMap.GetTile(codeMap.WorldToCell(transform.position)).Equals(mineTile))
     {
